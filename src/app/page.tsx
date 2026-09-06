@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-const categories = [
-  { name: "Electronics", slug: "electronics" },
-  { name: "Home & Kitchen", slug: "home-kitchen" },
-  { name: "Fashion", slug: "fashion" },
-  { name: "Sports & Outdoors", slug: "sports-outdoors" },
-];
+import { CATEGORIES } from "@/features/catalog/categories";
 
 export default function Home() {
   return (
@@ -32,11 +26,14 @@ export default function Home() {
       <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight">Shop by category</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {categories.map((category) => (
-            <Link key={category.slug} href={`/products?category=${category.slug}`}>
+          {CATEGORIES.map((category) => (
+            <Link
+              key={category}
+              href={{ pathname: "/products", query: { category } }}
+            >
               <Card className="transition-shadow hover:shadow-md">
                 <CardContent className="flex h-32 items-center justify-center p-4 text-center font-medium">
-                  {category.name}
+                  {category}
                 </CardContent>
               </Card>
             </Link>

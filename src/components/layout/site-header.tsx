@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { ShoppingCart, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +69,14 @@ function AccountMenu() {
 export function SiteHeader() {
   const cartCount = useCartCount();
   const setCartOpen = useCartStore((state) => state.setOpen);
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = searchTerm.trim();
+    router.push(trimmed ? `/products?search=${encodeURIComponent(trimmed)}` : "/products");
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -79,19 +89,24 @@ export function SiteHeader() {
           <Link href="/products" className="text-muted-foreground hover:text-foreground">
             All Products
           </Link>
-          <Link href="/products?category=featured" className="text-muted-foreground hover:text-foreground">
-            Featured
-          </Link>
-          <Link href="/products?sort=newest" className="text-muted-foreground hover:text-foreground">
+          <Link
+            href={{ pathname: "/products", query: { sort: "newest" } }}
+            className="text-muted-foreground hover:text-foreground"
+          >
             New Arrivals
           </Link>
         </nav>
 
         <div className="ml-auto flex flex-1 items-center justify-end gap-2">
-          <div className="relative hidden max-w-sm flex-1 sm:block">
+          <form onSubmit={handleSearchSubmit} className="relative hidden max-w-sm flex-1 sm:block">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search products..." className="pl-8" />
-          </div>
+            <Input
+              placeholder="Search products..."
+              className="pl-8"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </form>
 
           <AccountMenu />
 
