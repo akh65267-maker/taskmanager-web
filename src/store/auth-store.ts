@@ -1,24 +1,27 @@
 import { create } from "zustand";
-
-export type AuthUser = {
-  id: string;
-  email: string;
-  displayName: string;
-};
+import { persist } from "zustand/middleware";
 
 type AuthState = {
-  user: AuthUser | null;
-  setUser: (user: AuthUser | null) => void;
+  token: string | null;
+  expiresAtUtc: string | null;
+  setSession: (token: string, expiresAtUtc: string) => void;
   logout: () => void;
+  isAuthenticated: () => boolean;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-  logout: () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("accessToken");
-    }
-    set({ user: null });
-  },
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      token: null,
+      expiresAtUtc: null,
+      setSession: (token, expiresAtUtc) => set({ token, expiresAtUtc }),
+      logout: () => set({ token: null, expiresAtUtc: null }),
+      isAuthenticated: () => {
+        const { token, expiresAtUtc } = get();
+        if (!token || !expiresAtUtc) return false;
+        return new Date(expiresAtUtc).getTime() > Date.now();
+      },
+    }),
+    { name: "tm-auth" },
+  ),
+);

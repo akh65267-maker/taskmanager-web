@@ -4,7 +4,65 @@ import Link from "next/link";
 import { ShoppingCart, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCartCount, useCartStore } from "@/store/cart-store";
+import { useAuthStore } from "@/store/auth-store";
+import { useCurrentUser, useLogout } from "@/features/auth/use-auth";
+
+function AccountMenu() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const { data: user } = useCurrentUser();
+  const logout = useLogout();
+
+  if (!isAuthenticated) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        nativeButton={false}
+        render={
+          <Link href="/login">
+            <User className="h-5 w-5" />
+            <span className="sr-only">Sign in</span>
+          </Link>
+        }
+      />
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon">
+            <User className="h-5 w-5" />
+            <span className="sr-only">Account</span>
+          </Button>
+        }
+      />
+      <DropdownMenuContent align="end">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{user?.displayName ?? "My account"}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            render={<Link href="/account">Profile &amp; orders</Link>}
+          />
+          <DropdownMenuItem onClick={() => logout()} variant="destructive">
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export function SiteHeader() {
   const cartCount = useCartCount();
@@ -35,17 +93,7 @@ export function SiteHeader() {
             <Input placeholder="Search products..." className="pl-8" />
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            nativeButton={false}
-            render={
-              <Link href="/account">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Account</span>
-              </Link>
-            }
-          />
+          <AccountMenu />
 
           <Button
             variant="ghost"
