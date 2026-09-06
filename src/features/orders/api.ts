@@ -11,6 +11,7 @@ export type OrderDto = {
   totalAmount: number;
   status: OrderStatus;
   createdAtUtc: string;
+  cancellationReason: string | null;
 };
 
 export type CreateOrderItem = { productId: string; quantity: number; unitPrice: number };

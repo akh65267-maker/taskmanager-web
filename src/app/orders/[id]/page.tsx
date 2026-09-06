@@ -51,6 +51,12 @@ export default function OrderDetailPage(props: PageProps<"/orders/[id]">) {
             </p>
           )}
 
+          {order.status === "Cancelled" && (
+            <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {order.cancellationReason ?? "This order could not be fulfilled."}
+            </p>
+          )}
+
           <ul className="flex flex-col divide-y">
             {order.items.map((item) => (
               <li key={item.productId} className="flex items-center justify-between py-3 text-sm">

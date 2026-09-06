@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProduct } from "@/features/catalog/use-products";
+import { useInventory } from "@/features/inventory/use-inventory";
 import { useCartStore } from "@/store/cart-store";
 
 export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
   const { id } = use(props.params);
   const { data: product, isLoading, isError } = useProduct(id);
+  const { data: inventory, isLoading: isInventoryLoading } = useInventory(id);
   const addItem = useCartStore((state) => state.addItem);
 
   if (isLoading) {
@@ -34,6 +36,9 @@ export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
     );
   }
 
+  const inStock = (inventory?.quantityAvailable ?? 0) > 0;
+  const canAddToCart = !isInventoryLoading && inStock;
+
   return (
     <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 px-4 py-16 sm:px-6 md:grid-cols-2 lg:px-8">
       <div className="flex aspect-square items-center justify-center bg-muted text-sm text-muted-foreground">
@@ -48,9 +53,18 @@ export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
         <p className="text-2xl font-semibold">${product.price.toFixed(2)}</p>
         <p className="text-muted-foreground">{product.description}</p>
 
+        {!isInventoryLoading && (
+          <p className={`text-sm font-medium ${inStock ? "text-green-600 dark:text-green-500" : "text-destructive"}`}>
+            {inStock
+              ? `In stock (${inventory!.quantityAvailable} available)`
+              : "Currently unavailable"}
+          </p>
+        )}
+
         <Button
           size="lg"
           className="mt-4 w-fit"
+          disabled={!canAddToCart}
           onClick={() => {
             addItem({
               productId: product.id,
@@ -61,7 +75,7 @@ export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
             toast.success(`${product.name} added to cart`);
           }}
         >
-          Add to cart
+          {canAddToCart ? "Add to cart" : "Out of stock"}
         </Button>
       </div>
     </div>
