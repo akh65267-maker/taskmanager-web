@@ -54,9 +54,8 @@ function AccountMenu() {
         <DropdownMenuGroup>
           <DropdownMenuLabel>{user?.displayName ?? "My account"}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            render={<Link href="/account">Profile &amp; orders</Link>}
-          />
+          <DropdownMenuItem render={<Link href="/account">Profile</Link>} />
+          <DropdownMenuItem render={<Link href="/orders">Orders</Link>} />
           <DropdownMenuItem onClick={() => logout()} variant="destructive">
             Sign out
           </DropdownMenuItem>

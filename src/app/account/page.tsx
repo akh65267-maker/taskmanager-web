@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,16 +50,22 @@ export default function AccountPage() {
             </>
           )}
 
-          <Button
-            variant="outline"
-            className="mt-4 w-fit"
-            onClick={() => {
-              logout();
-              router.push("/");
-            }}
-          >
-            Sign out
-          </Button>
+          <div className="mt-4 flex gap-2">
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/orders">View orders</Link>}
+            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                logout();
+                router.push("/");
+              }}
+            >
+              Sign out
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

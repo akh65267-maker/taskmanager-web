@@ -22,6 +22,6 @@ export const useAuthStore = create<AuthState>()(
         return new Date(expiresAtUtc).getTime() > Date.now();
       },
     }),
-    { name: "tm-auth" },
+    { name: "tm-auth", skipHydration: true },
   ),
 );

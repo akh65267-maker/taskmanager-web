@@ -1,7 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,17 @@ import { useLogin } from "@/features/auth/use-auth";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") ?? "/account";
   const loginMutation = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +31,7 @@ export default function LoginPage() {
     e.preventDefault();
     loginMutation.mutate(
       { email, password },
-      { onSuccess: () => router.push("/account") },
+      { onSuccess: () => router.push(redirectTo) },
     );
   }
 
