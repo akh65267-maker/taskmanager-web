@@ -201,7 +201,7 @@ function RestockControl({ productId }: { productId: string }) {
 }
 
 export default function AdminProductsPage() {
-  const { isReady } = useRequireAuth("/login?redirect=/admin/products");
+  const { isReady } = useRequireAuth("/login?redirect=/admin/products", { requireAdmin: true });
   const { data: productsResult, isLoading: isLoadingProducts } = useProducts({ pageSize: 100 });
   const { data: inventory } = useInventoryList();
 
@@ -214,12 +214,7 @@ export default function AdminProductsPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-16">
       <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Manage products</h1>
-          <p className="text-sm text-muted-foreground">
-            No role-based access control yet — any signed-in account can manage the catalog.
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Manage products</h1>
         <NewProductDialog />
       </div>
 

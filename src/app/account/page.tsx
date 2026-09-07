@@ -7,11 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser, useLogout } from "@/features/auth/use-auth";
 import { useRequireAuth } from "@/features/auth/use-require-auth";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function AccountPage() {
   const router = useRouter();
   const { isReady } = useRequireAuth("/login");
   const { data: user, isLoading } = useCurrentUser();
+  const isAdmin = useAuthStore((state) => state.isAdmin());
   const logout = useLogout();
 
   if (!isReady) {
@@ -49,11 +51,13 @@ export default function AccountPage() {
               nativeButton={false}
               render={<Link href="/orders">View orders</Link>}
             />
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href="/admin/products">Manage products</Link>}
-            />
+            {isAdmin && (
+              <Button
+                variant="outline"
+                nativeButton={false}
+                render={<Link href="/admin/products">Manage products</Link>}
+              />
+            )}
             <Button
               variant="outline"
               onClick={() => {
