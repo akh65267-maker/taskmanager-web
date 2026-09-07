@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuthStore } from "@/store/auth-store";
 import { useOrders } from "@/features/orders/use-orders";
+import { useRequireAuth } from "@/features/auth/use-require-auth";
 import type { OrderStatus } from "@/features/orders/api";
 
 const STATUS_VARIANT: Record<OrderStatus, "default" | "secondary" | "destructive"> = {
@@ -17,17 +15,10 @@ const STATUS_VARIANT: Record<OrderStatus, "default" | "secondary" | "destructive
 };
 
 export default function OrdersPage() {
-  const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const { isReady } = useRequireAuth("/login?redirect=/orders");
   const { data: orders, isLoading } = useOrders();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login?redirect=/orders");
-    }
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) {
+  if (!isReady) {
     return null;
   }
 

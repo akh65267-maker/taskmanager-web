@@ -6,7 +6,9 @@ import { useCartStore } from "@/store/cart-store";
 
 export function StoreHydrator() {
   useEffect(() => {
-    useAuthStore.persist.rehydrate();
+    Promise.resolve(useAuthStore.persist.rehydrate()).finally(() => {
+      useAuthStore.getState().setHasHydrated(true);
+    });
     useCartStore.persist.rehydrate();
   }, []);
 

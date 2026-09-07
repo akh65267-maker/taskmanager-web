@@ -34,3 +34,15 @@ export async function getProduct(id: string): Promise<ProductDto> {
   const { data } = await apiClient.get<ProductDto>(`/products/${id}`);
   return data;
 }
+
+export type CreateProductRequest = {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+};
+
+export async function createProduct(request: CreateProductRequest): Promise<{ id: string }> {
+  const { data } = await apiClient.post<{ id: string }>("/products", request);
+  return data;
+}

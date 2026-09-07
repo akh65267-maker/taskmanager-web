@@ -1,31 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useAuthStore } from "@/store/auth-store";
 import { useCartStore, useCartSubtotal } from "@/store/cart-store";
 import { useCreateOrder } from "@/features/orders/use-orders";
+import { useRequireAuth } from "@/features/auth/use-require-auth";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const { isReady } = useRequireAuth("/login?redirect=/checkout");
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clear);
   const subtotal = useCartSubtotal();
   const createOrder = useCreateOrder();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login?redirect=/checkout");
-    }
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) {
+  if (!isReady) {
     return null;
   }
 

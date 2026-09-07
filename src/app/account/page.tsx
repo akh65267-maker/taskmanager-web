@@ -1,27 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuthStore } from "@/store/auth-store";
 import { useCurrentUser, useLogout } from "@/features/auth/use-auth";
+import { useRequireAuth } from "@/features/auth/use-require-auth";
 
 export default function AccountPage() {
   const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const { isReady } = useRequireAuth("/login");
   const { data: user, isLoading } = useCurrentUser();
   const logout = useLogout();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated) {
+  if (!isReady) {
     return null;
   }
 
@@ -55,6 +48,11 @@ export default function AccountPage() {
               variant="outline"
               nativeButton={false}
               render={<Link href="/orders">View orders</Link>}
+            />
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/admin/products">Manage products</Link>}
             />
             <Button
               variant="outline"

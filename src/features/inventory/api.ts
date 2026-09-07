@@ -14,3 +14,18 @@ export async function getInventory(productId: string): Promise<InventoryItemDto 
     throw error;
   }
 }
+
+export async function createInventory(productId: string, quantityAvailable: number): Promise<InventoryItemDto> {
+  const { data } = await apiClient.post<InventoryItemDto>("/inventory", { productId, quantityAvailable });
+  return data;
+}
+
+export async function restockInventory(productId: string, quantity: number): Promise<InventoryItemDto> {
+  const { data } = await apiClient.post<InventoryItemDto>(`/inventory/${productId}/restock`, { quantity });
+  return data;
+}
+
+export async function listInventory(): Promise<InventoryItemDto[]> {
+  const { data } = await apiClient.get<InventoryItemDto[]>("/inventory");
+  return data;
+}

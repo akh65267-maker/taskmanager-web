@@ -4,6 +4,8 @@ import { persist } from "zustand/middleware";
 type AuthState = {
   token: string | null;
   expiresAtUtc: string | null;
+  hasHydrated: boolean;
+  setHasHydrated: (value: boolean) => void;
   setSession: (token: string, expiresAtUtc: string) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
@@ -14,6 +16,8 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       token: null,
       expiresAtUtc: null,
+      hasHydrated: false,
+      setHasHydrated: (value) => set({ hasHydrated: value }),
       setSession: (token, expiresAtUtc) => set({ token, expiresAtUtc }),
       logout: () => set({ token: null, expiresAtUtc: null }),
       isAuthenticated: () => {
@@ -22,6 +26,10 @@ export const useAuthStore = create<AuthState>()(
         return new Date(expiresAtUtc).getTime() > Date.now();
       },
     }),
-    { name: "tm-auth", skipHydration: true },
+    {
+      name: "tm-auth",
+      skipHydration: true,
+      partialize: (state) => ({ token: state.token, expiresAtUtc: state.expiresAtUtc }),
+    },
   ),
 );
