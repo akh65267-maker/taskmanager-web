@@ -25,11 +25,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Type check
-        run: npx tsc --noEmit
-
-      # No test suite yet - this project has none. A real backend isn't
-      # reachable in CI, so `next build` here only proves the app compiles
+      # No separate `tsc --noEmit` step: Next.js's PageProps/LayoutProps
+      # global route types only exist after `next dev`/`next build`/
+      # `next typegen` has generated next-env.d.ts's references, which
+      # doesn't exist yet on a fresh checkout. `next build` runs its own
+      # full TypeScript check internally as part of the build, so that's
+      # the single source of truth here instead.
+      #
+      # No test suite exists yet for this project either. A real backend
+      # isn't reachable in CI, so this build only proves the app compiles
       # and prerenders, not that API calls work.
       - name: Build
         run: npm run build
