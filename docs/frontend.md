@@ -1,7 +1,7 @@
 # Frontend Architecture
 
 Repo: `taskmanager-web` (separate from the `TaskManager` backend repo).
-Verified against source on 2026-09-09. Source code is the ultimate truth — if this
+Verified against source on 2026-09-19 (through commit `7df89c2`). Source code is the ultimate truth — if this
 document disagrees with the code, the code wins.
 
 ## Overview
@@ -15,7 +15,10 @@ document disagrees with the code, the code wins.
 | Client state | Zustand v5 (`persist`, `skipHydration`) |
 | HTTP | Axios, single shared instance |
 | Icons / toasts | lucide-react / sonner |
-| Tests | **None.** CI (`.github/workflows/ci.yml`) runs `npm run lint` + `npm run build` only |
+| Theming | `next-themes` (`ThemeProvider`, class strategy, header toggle) |
+| Animation | `@rive-app/react-canvas` via `RivePlayer` — scaffolded only; no `.riv` files and no live usage yet |
+| Tests | Playwright end-to-end only (`e2e/`, `npm run test:e2e`), run locally against the real backend. No unit tests. CI (`.github/workflows/ci.yml`) runs `npm run lint` + `npm run build` only — see Testing |
+| Git hooks | Husky `pre-commit` → `lint-staged` → `eslint --fix` on staged `*.ts`/`*.tsx` |
 
 The app is a storefront over the backend microservices, reached through the API gateway.
 Every page that touches data is a Client Component (`"use client"`); there is no server-side
@@ -44,16 +47,18 @@ src/
 ## Routing
 
 App Router, no route groups, no nested layouts. `src/app/layout.tsx` is the only layout and
-mounts `QueryProvider → StoreHydrator + SiteHeader + main + SiteFooter + CartDrawer + Toaster`.
+mounts `ThemeProvider → QueryProvider → StoreHydrator + SiteHeader + main + SiteFooter +
+CartDrawer + Toaster`. `<html>` carries `suppressHydrationWarning` because `next-themes` sets
+the theme class before hydration.
 
 | Route | Access | Notes |
 |---|---|---|
-| `/` | public | Static hero + category links (server component) |
+| `/` | public | Static hero + category grid with illustrations (server component). The hero's stats ("4 Categories", "Free Returns", "24/7 Support") and the "Free shipping over $50" badge are hardcoded copy, not backed by any data or backend feature |
 | `/products` | public | Filters/sort/pagination driven by URL search params |
 | `/products/[id]` | public | Product detail + stock, add-to-cart |
 | `/login`, `/register` | public | `/login?redirect=<path>` is honored |
 | `/account` | auth | Profile, sign out, admin link if Admin |
-| `/orders`, `/orders/[id]` | auth (`/orders` guarded; detail **not** guarded) | |
+| `/orders`, `/orders/[id]` | auth | Both guarded. The detail page redirects to bare `/login` (no `?redirect=`), so after signing in the user lands on `/account`, not back on the order |
 | `/checkout` | auth | |
 | `/admin/products` | auth + Admin | |
 
@@ -80,11 +85,12 @@ LoginPage → useLogin() → POST /users/login → { token, expiresAtUtc }
   endpoints, including public ones).
 - **Expiry:** `isAuthenticated()` compares `expiresAtUtc` to `Date.now()`. There is no timer;
   expiry is only noticed on the next render or the next 401.
-- **401 handling:** a response interceptor calls `authStore.logout()` and re-rejects. It does
-  **not** redirect and does **not** clear the React Query cache; the user is bounced to
-  `/login` only if they are on a `useRequireAuth` page (its effect fires on the state change).
-- **Logout:** `useLogout()` clears the auth store and removes `["currentUser"]` queries. There
-  is no server-side logout/revocation call.
+- **401 handling:** a response interceptor calls `authStore.logout()`, clears the entire React
+  Query cache (`queryClient.clear()`), and re-rejects. It does **not** redirect; the user is
+  bounced to `/login` only if they are on a `useRequireAuth` page (its effect fires on the
+  state change).
+- **Logout:** `useLogout()` clears the auth store and the entire React Query cache. There is no
+  server-side logout/revocation call.
 - **Refresh persistence:** `persist` uses `skipHydration: true`; `StoreHydrator` (mounted in
   the root layout) rehydrates both stores in an effect and then sets `hasHydrated`. Guards wait
   on `hasHydrated` so a hard reload does not bounce a signed-in user to `/login`.
@@ -125,7 +131,10 @@ inventory record).
 
 ## React Query
 
-- One `QueryClient`, created lazily in state inside `QueryProvider` ("use client").
+- One `QueryClient`, a module-level singleton in `src/lib/query-client.ts`, handed to
+  `QueryProvider`. It is a singleton (rather than created in component state) so the Axios 401
+  interceptor can clear it outside React. That is only safe because nothing fetches on the
+  server — adding SSR data fetching would make this client shared across requests.
 - Defaults: `staleTime: 60_000`, `retry: 1`. No persistence, no devtools, no SSR hydration.
 
 | Key | Source | Notes |
@@ -204,10 +213,17 @@ own `unitPrice`.
 - Variants via `class-variance-authority`; `cn` is re-exported from the `cn` package through
   `src/lib/utils.ts` (not the usual local `clsx + tailwind-merge` helper).
 - Icons: `lucide-react`. Toasts: `sonner`, mounted once as `<Toaster />` in the root layout.
-- `next-themes` is a dependency but **only** `components/ui/sonner.tsx` uses `useTheme`. No
-  `ThemeProvider` is mounted and there is no theme toggle, so `theme` always falls back to
-  `"system"`. Dark-mode Tailwind classes exist in places (e.g. product stock text).
-- `src/components/ui/toast.tsx` exists but nothing imports it; sonner is the notification path.
+- Theming: `ThemeProvider` (`attribute="class"`, `defaultTheme="system"`) in the root layout; a
+  `ThemeToggle` in `SiteHeader` flips light/dark; `sonner` follows the theme via `useTheme`.
+- **Product imagery** is `ProductIllustration`: a colored icon tile keyed by category name.
+  It matches the four hardcoded categories exactly; any other category string (including a
+  misspelling in backend data) falls back to a neutral `Package` tile. There are no real
+  product images — the backend has no image field.
+- `RivePlayer` wraps `@rive-app/react-canvas` and falls back to its `fallback` prop until a
+  `.riv` file loads. Nothing renders it yet and `public/` contains no `.riv` files; it is
+  referenced only in a comment in `ProductIllustration`.
+- `EmptyState` (`components/ui/empty-state.tsx`) is the shared empty-list component (icon,
+  title, description, optional action), used by `/orders` and the cart drawer.
 - Responsive pattern: `max-w-7xl` (catalog) / `max-w-2xl` (forms, orders) containers with
   `px-4 sm:px-6 lg:px-8`, Tailwind breakpoint utilities. Header nav and search hide below
   `md`/`sm`.
@@ -217,7 +233,7 @@ own `unitPrice`.
 | Case | Behavior |
 |---|---|
 | Loading | `Skeleton` components; list pages show skeleton grids, `/products` dims the grid at `opacity: 0.6` while `isFetching` |
-| Empty | Inline muted text ("No products match your filters.", "Your cart is empty.", "You haven't placed any orders yet.") |
+| Empty | `EmptyState` component for `/orders` and the cart drawer; `/products` still uses inline muted text ("No products match your filters.") |
 | 401 | Interceptor logs out; guarded pages then redirect to `/login` |
 | 403 | No specific handling — a non-admin who reaches an admin call sees the generic error message |
 | 404 | Product detail renders "Product not found." on `isError`; `getInventory` maps 404 → `null`; restock maps 404 → create |
@@ -237,6 +253,28 @@ There is no React error boundary, no `error.tsx`, and no `not-found.tsx`.
 `NEXT_PUBLIC_*`, it is inlined at build time — a container image must be rebuilt to point at a
 different gateway. No Dockerfile exists in this repo.
 
+## Testing
+
+End-to-end tests live in `e2e/` and run with `npm run test:e2e` (config: `playwright.config.ts`,
+Chromium only). They run against the **real backend** — start the Docker stack in the
+`TaskManager` repo first; the tests do not start it. The config reuses a dev server already on
+port 3100, or starts one there; the port is fixed because the gateway's CORS policy allows
+`http://localhost:3100` only.
+
+| Test | Covers |
+|---|---|
+| catalog loads products from the backend | Frontend ↔ gateway wiring: a wrong `NEXT_PUBLIC_API_URL` fails here instead of leaving skeletons forever |
+| a new customer can check out and the order is confirmed | Register → add to cart → checkout → saga resolves to `Confirmed`, then asserts stock dropped by one in InventoryService |
+
+The checkout test registers a new `e2e+<id>@example.com` user on each run, and buys one unit of
+the first catalog product that has a non-zero price and stock (found via the public
+`GET /products` and `GET /inventory`). It skips, rather than fails, when no such product
+exists. Each run therefore leaves a test user and an order behind and consumes one unit of
+stock — acceptable on a local dev stack, not something to point at shared data.
+
+The tests are not in CI: GitHub Actions has no backend to reach. Running them there would
+mean starting the backend stack in the workflow.
+
 ## Important Conventions
 
 1. Components call feature hooks; only `features/*/api.ts` imports `apiClient`.
@@ -251,21 +289,25 @@ different gateway. No Dockerfile exists in this repo.
 
 ## Known Issues / Uncertainties
 
-- **No tests of any kind.** CI proves only that the app lints and builds; nothing verifies API
-  integration. Every behavior above is read from source, not from test evidence.
-- `/orders/[id]` is **not** guarded by `useRequireAuth`, unlike `/orders` and `/checkout`. An
-  unauthenticated visitor gets an un-redirected page whose request 401s (backend still enforces).
+- **Test coverage is thin.** Two end-to-end tests cover catalog loading and the checkout path
+  (see Testing); there are no unit or component tests, and CI still verifies only lint + build.
+  Most behavior above is read from source, not from test evidence.
 - Order pricing is client-supplied: checkout sends `unitPrice` from the local cart.
-  Whether `OrderService` re-validates price against the catalog is **not verified here** — see
-  the backend docs.
+  Verified in the backend (2026-09-19): `OrderService` does **not** re-validate — it stores the
+  client's `unitPrice` verbatim. Tracked in the backend `docs/TODO.md`.
 - Prices are formatted with `toFixed(2)` and a hardcoded `$`; there is no currency/locale
   handling.
 - Inconsistent mutation-error surface (inline text vs. toast) — recorded, not standardized.
-- The 401 interceptor logs out but leaves the React Query cache populated; stale
-  authenticated data can remain rendered until the component unmounts or refetches.
-- `next-themes` and `components/ui/toast.tsx` are effectively dead weight (see UI Architecture).
+- Categories are hardcoded (`categories.ts`) and must match backend data exactly. Products
+  whose stored category differs (e.g. a typo) never match a category filter and render with
+  the fallback illustration.
 - `admin` product creation has no rollback if the follow-up inventory call fails.
 - Product **editing/deletion** does not exist in the frontend — only create and restock.
-- Whether the gateway's `/products/{**catch-all}` route matches the bare `GET /products` the
-  catalog page issues is **Unknown / Requires Verification** from the frontend side (the app
-  assumes it does).
+- Local `.env.local` can silently drift from `.env.local.example`. A copy left pointing at
+  `http://localhost:5160` (the gateway's `dotnet run` port) fails every API call with
+  `ERR_CONNECTION_REFUSED` while the Docker stack is up, leaving `/products` on skeletons
+  indefinitely. Use `http://localhost:8000` with the Docker gateway.
+
+Verified 2026-09-19 against the running Docker stack: the gateway serves the bare
+`GET /products` the catalog page issues, and its CORS policy allows `http://localhost:3100`
+with credentials.
