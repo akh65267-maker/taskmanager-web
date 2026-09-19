@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { StoreHydrator } from "@/providers/store-hydrator";
@@ -30,14 +31,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <QueryProvider>
-          <StoreHydrator />
-          <SiteHeader />
-          <main className="flex flex-1 flex-col">{children}</main>
-          <SiteFooter />
-          <CartDrawer />
-          <Toaster />
-        </QueryProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <QueryProvider>
+            <StoreHydrator />
+            <SiteHeader />
+            <main className="flex flex-1 flex-col">{children}</main>
+            <SiteFooter />
+            <CartDrawer />
+            <Toaster />
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

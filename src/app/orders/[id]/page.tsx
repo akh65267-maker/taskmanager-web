@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrder } from "@/features/orders/use-orders";
+import { useRequireAuth } from "@/features/auth/use-require-auth";
 
 const STATUS_CONFIG = {
   Pending: { label: "Processing", icon: Clock, variant: "secondary" as const },
@@ -18,9 +19,10 @@ const STATUS_CONFIG = {
 
 export default function OrderDetailPage(props: PageProps<"/orders/[id]">) {
   const { id } = use(props.params);
+  const { isReady } = useRequireAuth("/login");
   const { data: order, isLoading } = useOrder(id);
 
-  if (isLoading || !order) {
+  if (!isReady || isLoading || !order) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16">
         <Skeleton className="h-32 w-full" />

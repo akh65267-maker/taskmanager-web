@@ -45,6 +45,6 @@ export function useLogout() {
 
   return () => {
     logout();
-    queryClient.removeQueries({ queryKey: ["currentUser"] });
+    queryClient.clear();
   };
 }

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ShoppingCart, Search, User } from "lucide-react";
+import { ShoppingCart, Search, User, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,6 +19,21 @@ import {
 import { useCartCount, useCartStore } from "@/store/cart-store";
 import { useAuthStore } from "@/store/auth-store";
 import { useCurrentUser, useLogout } from "@/features/auth/use-auth";
+
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+    >
+      <Sun className="h-5 w-5 dark:hidden" />
+      <Moon className="hidden h-5 w-5 dark:block" />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
+  );
+}
 
 function AccountMenu() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
@@ -106,6 +122,8 @@ export function SiteHeader() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
+
+          <ThemeToggle />
 
           <AccountMenu />
 

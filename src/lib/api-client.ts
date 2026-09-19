@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useAuthStore } from "@/store/auth-store";
+import { queryClient } from "@/lib/query-client";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
@@ -18,6 +19,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
+      queryClient.clear();
     }
     return Promise.reject(error);
   },
