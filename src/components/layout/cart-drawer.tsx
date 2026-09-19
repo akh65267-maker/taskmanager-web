@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ShoppingCart } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -9,6 +10,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useCartStore } from "@/store/cart-store";
 
 export function CartDrawer() {
@@ -27,9 +29,11 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-y-auto px-4">
           {items.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Your cart is empty.
-            </p>
+            <EmptyState
+              icon={ShoppingCart}
+              title="Your cart is empty"
+              description="Add items from the catalog to get started."
+            />
           ) : (
             <ul className="divide-y">
               {items.map((item) => (
@@ -38,7 +42,7 @@ export function CartDrawer() {
                     <p className="font-medium">{item.name}</p>
                     <p className="text-muted-foreground">Qty {item.quantity}</p>
                   </div>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="tabular-nums">${(item.price * item.quantity).toFixed(2)}</span>
                 </li>
               ))}
             </ul>
@@ -48,7 +52,7 @@ export function CartDrawer() {
         <SheetFooter className="border-t px-4 pt-4">
           <div className="mb-4 flex w-full items-center justify-between text-sm font-semibold">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span className="tabular-nums">${subtotal.toFixed(2)}</span>
           </div>
           <Button
             disabled={items.length === 0}

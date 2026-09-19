@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useProduct } from "@/features/catalog/use-products";
 import { useInventory } from "@/features/inventory/use-inventory";
 import { useCartStore } from "@/store/cart-store";
+import { ProductIllustration } from "@/features/catalog/product-illustration";
 
 export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
   const { id } = use(props.params);
@@ -41,8 +42,8 @@ export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
 
   return (
     <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 px-4 py-16 sm:px-6 md:grid-cols-2 lg:px-8">
-      <div className="flex aspect-square items-center justify-center bg-muted text-sm text-muted-foreground">
-        No image
+      <div className="aspect-square overflow-hidden rounded-xl">
+        <ProductIllustration category={product.category} className="h-full w-full" />
       </div>
 
       <div className="flex flex-col gap-4">

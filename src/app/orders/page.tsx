@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrders } from "@/features/orders/use-orders";
 import { useRequireAuth } from "@/features/auth/use-require-auth";
@@ -41,7 +44,7 @@ export default function OrdersPage() {
                     <p className="text-sm text-muted-foreground">
                       {new Date(order.createdAtUtc).toLocaleDateString()}
                     </p>
-                    <p className="font-medium">${order.totalAmount.toFixed(2)}</p>
+                    <p className="font-medium tabular-nums">${order.totalAmount.toFixed(2)}</p>
                   </div>
                   <Badge variant={STATUS_VARIANT[order.status] ?? "secondary"}>{order.status}</Badge>
                 </CardContent>
@@ -50,7 +53,18 @@ export default function OrdersPage() {
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground">You haven&apos;t placed any orders yet.</p>
+        <EmptyState
+          icon={Package}
+          title="No orders yet"
+          description="Once you place your first order, it'll show up here."
+          action={
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href="/products">Browse products</Link>}
+            />
+          }
+        />
       )}
     </div>
   );
