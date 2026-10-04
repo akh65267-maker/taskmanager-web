@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,22 +19,22 @@ export default function Home() {
 
         <div className="relative mx-auto flex max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
           {/* ── Left: text content ──────────────────── */}
-          <div className="flex flex-1 flex-col items-start gap-6">
-            <span className="inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
+          <div className="hero-scroll-text flex flex-1 flex-col items-start gap-6">
+            <span style={{ "--i": 0 } as CSSProperties} className="hero-rise inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
               Free shipping on orders over $50
             </span>
 
-            <h1 className="max-w-xl text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            <h1 style={{ "--i": 1 } as CSSProperties} className="hero-rise max-w-xl text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
               Everything you need,{" "}
               <span className="text-foreground/50">delivered fast.</span>
             </h1>
 
-            <p className="max-w-md text-lg text-muted-foreground">
+            <p style={{ "--i": 2 } as CSSProperties} className="hero-rise max-w-md text-lg text-muted-foreground">
               Browse across every category with fast checkout and real-time order
               tracking.
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            <div style={{ "--i": 3 } as CSSProperties} className="hero-rise flex flex-wrap gap-3">
               <Button
                 size="lg"
                 nativeButton={false}
@@ -48,7 +49,7 @@ export default function Home() {
             </div>
 
             {/* Stats strip */}
-            <div className="flex items-center gap-6 pt-2">
+            <div style={{ "--i": 4 } as CSSProperties} className="hero-rise flex items-center gap-6 pt-2">
               <div>
                 <p className="text-xl font-bold tabular-nums">4</p>
                 <p className="text-xs text-muted-foreground">Categories</p>
@@ -67,18 +68,20 @@ export default function Home() {
           </div>
 
           {/* ── Right: decorative category grid ─────── */}
-          <div className="relative hidden shrink-0 lg:block" aria-hidden>
+          <div className="hero-scroll-tiles relative hidden shrink-0 lg:block" aria-hidden>
             <div className="grid grid-cols-2 gap-3">
               {CATEGORIES.map((category, i) => (
                 <div
                   key={category}
-                  className={cn(
-                    "h-32 w-32 overflow-hidden rounded-2xl border border-border/50 shadow-sm",
-                    i === 1 && "mt-5",
-                    i === 3 && "-mt-5",
-                  )}
+                  style={{ "--i": i + 2 } as CSSProperties}
+                  className={cn("hero-rise", i === 1 && "mt-5", i === 3 && "-mt-5")}
                 >
-                  <ProductIllustration category={category} className="h-full w-full" />
+                  <div
+                    style={{ "--i": i } as CSSProperties}
+                    className="hero-float h-32 w-32 overflow-hidden rounded-2xl border border-border/50 shadow-sm"
+                  >
+                    <ProductIllustration category={category} className="h-full w-full" />
+                  </div>
                 </div>
               ))}
             </div>
