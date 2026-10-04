@@ -27,6 +27,8 @@ import { useProducts, useCreateProduct } from "@/features/catalog/use-products";
 import { useCreateInventory, useInventoryList, useRestockInventory } from "@/features/inventory/use-inventory";
 import { useRequireAuth } from "@/features/auth/use-require-auth";
 import { CATEGORIES } from "@/features/catalog/categories";
+import { ErrorMessage } from "@/components/ui/error-message";
+import { ErrorState } from "@/components/ui/error-state";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 function NewProductDialog() {
@@ -137,8 +139,12 @@ function NewProductDialog() {
             </Select>
           </div>
 
-          {createProduct.isError && (
-            <p className="text-sm text-destructive">{getApiErrorMessage(createProduct.error)}</p>
+          {createProduct.isError && <ErrorMessage>{getApiErrorMessage(createProduct.error)}</ErrorMessage>}
+          {createInventory.isError && (
+            <ErrorMessage>
+              The product was created, but setting its stock failed: {getApiErrorMessage(createInventory.error)}{" "}
+              Restock it from the list.
+            </ErrorMessage>
           )}
 
           <DialogFooter>
@@ -202,7 +208,13 @@ function RestockControl({ productId }: { productId: string }) {
 
 export default function AdminProductsPage() {
   const { isReady } = useRequireAuth("/login?redirect=/admin/products", { requireAdmin: true });
-  const { data: productsResult, isLoading: isLoadingProducts } = useProducts({ pageSize: 100 });
+  const {
+    data: productsResult,
+    isLoading: isLoadingProducts,
+    isError: isProductsError,
+    error: productsError,
+    refetch: refetchProducts,
+  } = useProducts({ pageSize: 100 });
   const { data: inventory } = useInventoryList();
 
   if (!isReady) {
@@ -224,6 +236,8 @@ export default function AdminProductsPage() {
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
         </div>
+      ) : isProductsError ? (
+        <ErrorState error={productsError} onRetry={() => refetchProducts()} title="Couldn't load products" />
       ) : (
         <Table>
           <TableHeader>

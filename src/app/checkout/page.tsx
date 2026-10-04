@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore, useCartSubtotal } from "@/store/cart-store";
@@ -90,9 +91,7 @@ export default function CheckoutPage() {
           </div>
 
           {createOrder.isError && (
-            <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {getApiErrorMessage(createOrder.error)}
-            </p>
+            <ErrorMessage>{getApiErrorMessage(createOrder.error)}</ErrorMessage>
           )}
 
           <Button

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLogin } from "@/features/auth/use-auth";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function LoginPage() {
@@ -68,9 +69,9 @@ function LoginPageContent() {
             </div>
 
             {loginMutation.isError && (
-              <p className="text-sm text-destructive">
+              <ErrorMessage>
                 {getApiErrorMessage(loginMutation.error, "Invalid email or password.")}
-              </p>
+              </ErrorMessage>
             )}
 
             <Button type="submit" disabled={loginMutation.isPending} className="mt-2 w-full">

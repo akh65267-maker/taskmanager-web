@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrders } from "@/features/orders/use-orders";
 import { useRequireAuth } from "@/features/auth/use-require-auth";
@@ -13,7 +14,7 @@ import { ORDER_STATUS } from "@/features/orders/status";
 
 export default function OrdersPage() {
   const { isReady } = useRequireAuth("/login?redirect=/orders");
-  const { data: orders, isLoading } = useOrders();
+  const { data: orders, isLoading, isError, error, refetch } = useOrders();
 
   if (!isReady) {
     return null;
@@ -28,6 +29,8 @@ export default function OrdersPage() {
           <Skeleton className="h-20 w-full" />
           <Skeleton className="h-20 w-full" />
         </div>
+      ) : isError ? (
+        <ErrorState error={error} onRetry={() => refetch()} title="Couldn't load your orders" />
       ) : orders && orders.length > 0 ? (
         <div className="flex flex-col gap-3">
           {orders.map((order) => (

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ORDER_STATUS } from "@/features/orders/status";
 import { useOrder } from "@/features/orders/use-orders";
@@ -15,7 +16,11 @@ import { useRequireAuth } from "@/features/auth/use-require-auth";
 export default function OrderDetailPage(props: PageProps<"/orders/[id]">) {
   const { id } = use(props.params);
   const { isReady } = useRequireAuth("/login");
-  const { data: order, isLoading } = useOrder(id);
+  const { data: order, isLoading, isError, error, refetch } = useOrder(id);
+
+  if (isReady && isError && !order) {
+    return <ErrorState className="py-24" error={error} onRetry={() => refetch()} title="Couldn't load this order" />;
+  }
 
   if (!isReady || isLoading || !order) {
     return (

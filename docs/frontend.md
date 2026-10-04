@@ -233,11 +233,13 @@ own `unitPrice`.
 | Case | Behavior |
 |---|---|
 | Loading | `Skeleton` components; list pages show skeleton grids, `/products` dims the grid at `opacity: 0.6` while `isFetching` |
-| Empty | `EmptyState` component for `/orders` and the cart drawer; `/products` still uses inline muted text ("No products match your filters.") |
+| Empty | `EmptyState` component: `/orders`, `/products` (with "Clear filters"), the cart drawer, checkout, and a missing product |
 | 401 | Interceptor logs out; guarded pages then redirect to `/login` |
 | 403 | No specific handling — a non-admin who reaches an admin call sees the generic error message |
-| 404 | Product detail renders "Product not found." on `isError`; `getInventory` maps 404 → `null`; restock maps 404 → create |
-| Mutation errors | **Two conventions coexist:** inline `<p className="text-destructive">` from `getApiErrorMessage` (login, register, checkout, new-product dialog) and `toast.error(...)` (restock). Successes on admin/cart actions use `toast.success`. |
+| 404 | Product detail renders a "Product not found" `EmptyState` on `isError`; `getInventory` maps 404 → `null`; restock maps 404 → create |
+| Load failure | `ErrorState` (`components/ui/error-state.tsx`) with a "Try again" button replaces the content on `/products`, `/orders`, `/orders/[id]` and the admin list. Before this, a failed request looked like an empty list or a never-ending skeleton. |
+| Submit errors | `ErrorMessage` (`components/ui/error-message.tsx`, `role="alert"`) beside the control: login, register, checkout, new-product dialog (which also reports a failed initial-stock call: the product exists, stock was not set). |
+| Row-level action errors | `toast.error` — restock, where an inline message would have no good place. Successes use `toast.success`. |
 | Network failure | No dedicated handling; surfaces as the generic fallback message |
 | Validation | Native HTML form validation only (`required`, `type="email"`, `minLength={8}`, `min`/`step`). No schema validation library. |
 
@@ -285,7 +287,7 @@ mean starting the backend stack in the workflow.
 5. Mutations invalidate query keys in `onSuccess`; no manual cache writes.
 6. URL search params are the source of truth for catalog filter/sort/page state.
 7. Base UI composition uses `render={...}`, not `asChild`.
-8. Error copy comes from `getApiErrorMessage`, never from `error.message`.
+8. Error copy comes from `getApiErrorMessage`, never from `error.message`. Where it shows follows the table in Error Handling: page data → `ErrorState`, a submitted form → `ErrorMessage`, a row action → toast.
 
 ## Known Issues / Uncertainties
 
@@ -297,7 +299,6 @@ mean starting the backend stack in the workflow.
   client's `unitPrice` verbatim. Tracked in the backend `docs/TODO.md`.
 - Prices are formatted with `toFixed(2)` and a hardcoded `$`; there is no currency/locale
   handling.
-- Inconsistent mutation-error surface (inline text vs. toast) — recorded, not standardized.
 - Categories are hardcoded (`categories.ts`) and must match backend data exactly. Products
   whose stored category differs (e.g. a typo) never match a category filter and render with
   the fallback illustration.

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SearchX } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProducts } from "@/features/catalog/use-products";
@@ -63,7 +64,7 @@ function ProductsPageContent() {
     router.push(`/products?${params.toString()}`);
   }
 
-  const { data, isLoading, isFetching } = useProducts({
+  const { data, isLoading, isFetching, isError, error, refetch } = useProducts({
     category: filters.category ?? undefined,
     minPrice: filters.minPrice > 0 ? filters.minPrice : undefined,
     maxPrice: filters.maxPrice < MAX_PRICE ? filters.maxPrice : undefined,
@@ -122,6 +123,8 @@ function ProductsPageContent() {
                 <Skeleton key={i} className="aspect-[3/4] w-full" />
               ))}
             </div>
+          ) : isError && !data ? (
+            <ErrorState error={error} onRetry={() => refetch()} title="Couldn't load products" />
           ) : data && data.items.length > 0 ? (
             <div
               className="grid grid-cols-2 gap-4 transition-opacity duration-200 sm:grid-cols-3 lg:grid-cols-4"

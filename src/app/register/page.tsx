@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLogin, useRegister } from "@/features/auth/use-auth";
+import { ErrorMessage } from "@/components/ui/error-message";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 export default function RegisterPage() {
@@ -80,9 +81,7 @@ export default function RegisterPage() {
             </div>
 
             {registerMutation.isError && (
-              <p className="text-sm text-destructive">
-                {getApiErrorMessage(registerMutation.error)}
-              </p>
+              <ErrorMessage>{getApiErrorMessage(registerMutation.error)}</ErrorMessage>
             )}
 
             <Button type="submit" disabled={isPending} className="mt-2 w-full">
