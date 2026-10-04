@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CATEGORIES } from "@/features/catalog/categories";
+import { NewArrivals } from "@/features/catalog/product-row";
 import { ProductIllustration } from "@/features/catalog/product-illustration";
 import { cn } from "@/lib/utils";
 
@@ -89,8 +90,10 @@ export default function Home() {
         </div>
       </section>
 
+      <NewArrivals />
+
       {/* ── Category grid ────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <section className="reveal mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight">Shop by category</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {CATEGORIES.map((category) => (

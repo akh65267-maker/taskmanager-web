@@ -135,7 +135,9 @@ export function SiteHeader() {
           >
             <ShoppingCart className="h-5 w-5" />
             {cartCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+              <span
+                key={cartCount}
+                className="animate-in zoom-in-150 duration-300 motion-reduce:animate-none absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
                 {cartCount}
               </span>
             )}
