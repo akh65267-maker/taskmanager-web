@@ -198,6 +198,7 @@ own `unitPrice`.
 - `app/admin/layout.tsx` is the admin shell: a sidebar (a tab row on mobile) driven by its `NAV` array, a "Back to shop" link, and the **single guard** for every admin page: `useRequireAuth(`/login?redirect=<current path>`, { requireAdmin: true })`. Admin pages no longer guard themselves. To add a section, add a page under `app/admin/` and one `NAV` entry.
 - The only section today is Products. The shop header and footer still wrap it; they would not in a separate admin app.
 - Linked from `/account` only when `isAdmin()`.
+- **Boundaries are lint-enforced** (`eslint.config.mjs`, `no-restricted-imports`): nothing outside `app/admin` may import from it, and admin may not import shop-specific UI (`components/layout`, `product-card`/`-row`/`-filters`) or the cart store. This keeps a later split into its own app mechanical; the plan for that (`apps/web`, `apps/admin`, shared `ui`/`api`/`auth` packages) is deliberately deferred until admin outgrows one section or needs its own session policy.
 - Lists `useProducts({ pageSize: 100 })` joined against `useInventoryList()` via a
   `Map<productId, quantityAvailable>`.
 - **New product** is a two-step client-orchestrated flow: `POST /products`, then on success
