@@ -2,20 +2,15 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ORDER_STATUS } from "@/features/orders/status";
 import { useOrder } from "@/features/orders/use-orders";
+import { cn } from "@/lib/utils";
 import { useRequireAuth } from "@/features/auth/use-require-auth";
-
-const STATUS_CONFIG = {
-  Pending: { label: "Processing", icon: Clock, variant: "secondary" as const },
-  Confirmed: { label: "Confirmed", icon: CheckCircle2, variant: "default" as const },
-  Cancelled: { label: "Cancelled", icon: XCircle, variant: "destructive" as const },
-};
 
 export default function OrderDetailPage(props: PageProps<"/orders/[id]">) {
   const { id } = use(props.params);
@@ -30,18 +25,30 @@ export default function OrderDetailPage(props: PageProps<"/orders/[id]">) {
     );
   }
 
-  const status = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.Pending;
+  const status = ORDER_STATUS[order.status] ?? ORDER_STATUS.Pending;
   const StatusIcon = status.icon;
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-16">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Order confirmation</CardTitle>
-          <Badge variant={status.variant} className="gap-1">
-            <StatusIcon className="h-3.5 w-3.5" />
-            {status.label}
-          </Badge>
+        <CardHeader className="flex flex-row items-center gap-4">
+          {/* Keyed by status so the icon replays its entrance when Pending becomes Confirmed or Cancelled. */}
+          <div
+            key={order.status}
+            className={cn(
+              "flex size-12 shrink-0 items-center justify-center rounded-full animate-in zoom-in-50 fade-in duration-500 motion-reduce:animate-none",
+              status.tone,
+              order.status === "Pending" && "motion-safe:animate-pulse",
+            )}
+          >
+            <StatusIcon className="size-6" />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <CardTitle className="text-2xl">{status.title}</CardTitle>
+            <Badge variant={status.variant} className="w-fit gap-1">
+              {status.label}
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>

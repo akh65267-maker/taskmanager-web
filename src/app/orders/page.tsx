@@ -9,13 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrders } from "@/features/orders/use-orders";
 import { useRequireAuth } from "@/features/auth/use-require-auth";
-import type { OrderStatus } from "@/features/orders/api";
-
-const STATUS_VARIANT: Record<OrderStatus, "default" | "secondary" | "destructive"> = {
-  Pending: "secondary",
-  Confirmed: "default",
-  Cancelled: "destructive",
-};
+import { ORDER_STATUS } from "@/features/orders/status";
 
 export default function OrdersPage() {
   const { isReady } = useRequireAuth("/login?redirect=/orders");
@@ -46,7 +40,9 @@ export default function OrdersPage() {
                     </p>
                     <p className="font-medium tabular-nums">${order.totalAmount.toFixed(2)}</p>
                   </div>
-                  <Badge variant={STATUS_VARIANT[order.status] ?? "secondary"}>{order.status}</Badge>
+                  <Badge variant={(ORDER_STATUS[order.status] ?? ORDER_STATUS.Pending).variant}>
+                    {(ORDER_STATUS[order.status] ?? ORDER_STATUS.Pending).label}
+                  </Badge>
                 </CardContent>
               </Card>
             </Link>
