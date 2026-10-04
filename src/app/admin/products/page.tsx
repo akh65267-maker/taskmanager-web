@@ -250,7 +250,7 @@ export default function AdminProductsPage() {
                 <TableCell>${product.price.toFixed(2)}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <span className="w-8 text-sm tabular-nums">
+                    <span className="min-w-16 text-right text-sm tabular-nums">
                       {stockByProductId.get(product.id) ?? 0}
                     </span>
                     <RestockControl productId={product.id} />
