@@ -25,7 +25,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProducts, useCreateProduct } from "@/features/catalog/use-products";
 import { useCreateInventory, useInventoryList, useRestockInventory } from "@/features/inventory/use-inventory";
-import { useRequireAuth } from "@/features/auth/use-require-auth";
 import { CATEGORIES } from "@/features/catalog/categories";
 import { ErrorMessage } from "@/components/ui/error-message";
 import { ErrorState } from "@/components/ui/error-state";
@@ -207,7 +206,6 @@ function RestockControl({ productId }: { productId: string }) {
 }
 
 export default function AdminProductsPage() {
-  const { isReady } = useRequireAuth("/login?redirect=/admin/products", { requireAdmin: true });
   const {
     data: productsResult,
     isLoading: isLoadingProducts,
@@ -217,14 +215,10 @@ export default function AdminProductsPage() {
   } = useProducts({ pageSize: 100 });
   const { data: inventory } = useInventoryList();
 
-  if (!isReady) {
-    return null;
-  }
-
   const stockByProductId = new Map(inventory?.map((i) => [i.productId, i.quantityAvailable]));
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-16">
+    <div className="w-full">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Manage products</h1>
         <NewProductDialog />

@@ -60,7 +60,8 @@ the theme class before hydration.
 | `/account` | auth | Profile, sign out, admin link if Admin |
 | `/orders`, `/orders/[id]` | auth | Both guarded. The detail page redirects to bare `/login` (no `?redirect=`), so after signing in the user lands on `/account`, not back on the order |
 | `/checkout` | auth | |
-| `/admin/products` | auth + Admin | |
+| `/admin` | auth + Admin | Redirects to `/admin/products` |
+| `/admin/products` | auth + Admin | Product list, create, restock |
 
 Pages that read `useSearchParams` (`/products`, `/login`) wrap their content in `<Suspense>`
 — required for the App Router prerender.
@@ -194,9 +195,9 @@ own `unitPrice`.
 
 ## Admin Panel
 
-- No admin layout or nav; a single page `/admin/products`, linked from `/account` only when
-  `isAdmin()`.
-- Guarded by `useRequireAuth("/login?redirect=/admin/products", { requireAdmin: true })`.
+- `app/admin/layout.tsx` is the admin shell: a sidebar (a tab row on mobile) driven by its `NAV` array, a "Back to shop" link, and the **single guard** for every admin page: `useRequireAuth(`/login?redirect=<current path>`, { requireAdmin: true })`. Admin pages no longer guard themselves. To add a section, add a page under `app/admin/` and one `NAV` entry.
+- The only section today is Products. The shop header and footer still wrap it; they would not in a separate admin app.
+- Linked from `/account` only when `isAdmin()`.
 - Lists `useProducts({ pageSize: 100 })` joined against `useInventoryList()` via a
   `Map<productId, quantityAvailable>`.
 - **New product** is a two-step client-orchestrated flow: `POST /products`, then on success
