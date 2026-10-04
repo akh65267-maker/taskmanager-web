@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SearchX } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProducts } from "@/features/catalog/use-products";
 import { ProductCard } from "@/features/catalog/product-card";
@@ -17,6 +19,13 @@ import { ProductFilters, MAX_PRICE, type FilterState } from "@/features/catalog/
 import type { ProductListParams } from "@/features/catalog/api";
 
 const PAGE_SIZE = 12;
+
+const SORT_LABELS: Record<string, string> = {
+  newest: "Newest",
+  "price-asc": "Price: Low to High",
+  "price-desc": "Price: High to Low",
+  name: "Name",
+};
 
 export default function ProductsPage() {
   return (
@@ -69,7 +78,7 @@ function ProductsPageContent() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[240px_1fr]">
-        <aside>
+        <aside className="md:sticky md:top-20 md:self-start">
           <ProductFilters
             filters={filters}
             onChange={(next) => {
@@ -85,14 +94,18 @@ function ProductsPageContent() {
 
         <div>
           <div className="mb-6 flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              {data ? `${data.totalCount} products` : "Loading..."}
-              {filters.search && ` for "${filters.search}"`}
-            </p>
+            {data ? (
+              <p className="text-sm text-muted-foreground">
+                {data.totalCount} {data.totalCount === 1 ? "product" : "products"}
+                {filters.search && ` for "${filters.search}"`}
+              </p>
+            ) : (
+              <Skeleton className="h-5 w-24" />
+            )}
 
             <Select value={sort} onValueChange={(value) => updateParams({ sort: value as string })}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort by">{(value) => SORT_LABELS[value as string]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest</SelectItem>
@@ -111,7 +124,7 @@ function ProductsPageContent() {
             </div>
           ) : data && data.items.length > 0 ? (
             <div
-              className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"
+              className="grid grid-cols-2 gap-4 transition-opacity duration-200 sm:grid-cols-3 lg:grid-cols-4"
               style={{ opacity: isFetching ? 0.6 : 1 }}
             >
               {data.items.map((product) => (
@@ -119,9 +132,16 @@ function ProductsPageContent() {
               ))}
             </div>
           ) : (
-            <p className="py-16 text-center text-muted-foreground">
-              No products match your filters.
-            </p>
+            <EmptyState
+              icon={SearchX}
+              title="No products found"
+              description="Nothing matches your filters. Try widening the price range or clearing them."
+              action={
+                <Button variant="outline" onClick={() => router.push("/products")}>
+                  Clear filters
+                </Button>
+              }
+            />
           )}
 
           {data && totalPages > 1 && (

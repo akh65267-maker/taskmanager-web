@@ -95,7 +95,7 @@ export default function Home() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {CATEGORIES.map((category) => (
             <Link key={category} href={{ pathname: "/products", query: { category } }}>
-              <Card className="group overflow-hidden transition-shadow hover:shadow-md">
+              <Card className="group gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md">
                 <div className="aspect-[4/3] overflow-hidden">
                   <ProductIllustration
                     category={category}
