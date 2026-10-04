@@ -243,7 +243,7 @@ own `unitPrice`.
 | Network failure | No dedicated handling; surfaces as the generic fallback message |
 | Validation | Native HTML form validation only (`required`, `type="email"`, `minLength={8}`, `min`/`step`). No schema validation library. |
 
-There is no React error boundary, no `error.tsx`, and no `not-found.tsx`.
+Unexpected render errors are caught by `app/error.tsx` (header and footer stay; the "Try again" button calls `retry()`, which is this Next.js version's recovery call rather than the older `reset()`). Unknown URLs get `app/not-found.tsx` (HTTP 404). `app/global-error.tsx` covers a failure of the root layout itself; it renders its own document and is always light, because the theme toggle lives in that layout.
 
 ## Environment Configuration
 
