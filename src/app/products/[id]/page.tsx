@@ -9,12 +9,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProduct } from "@/features/catalog/use-products";
 import { useInventory } from "@/features/inventory/use-inventory";
-import { useCartStore } from "@/store/cart-store";
+import { MAX_PER_ORDER, useCartStore } from "@/store/cart-store";
 import { ProductIllustration } from "@/features/catalog/product-illustration";
 import { cn } from "@/lib/utils";
 
 const LOW_STOCK = 5;
-const MAX_PER_ORDER = 10;
 
 export default function ProductDetailPage(props: PageProps<"/products/[id]">) {
   const { id } = use(props.params);

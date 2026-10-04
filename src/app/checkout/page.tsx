@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore, useCartSubtotal } from "@/store/cart-store";
 import { useCreateOrder } from "@/features/orders/use-orders";
@@ -40,28 +42,42 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <p className="text-muted-foreground">Your cart is empty.</p>
-        <Button className="mt-4" render={<Link href="/products">Continue shopping</Link>} nativeButton={false} />
-      </div>
+      <EmptyState
+        className="py-24"
+        icon={ShoppingCart}
+        title="Your cart is empty"
+        description="Add something from the catalog before checking out."
+        action={
+          <Button nativeButton={false} render={<Link href="/products">Continue shopping</Link>} />
+        }
+      />
     );
   }
 
+  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-16">
+    <div className="mx-auto w-full max-w-2xl px-4 py-12">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Review your order</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {itemCount} {itemCount === 1 ? "item" : "items"}
+          </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ul className="flex flex-col divide-y">
             {items.map((item) => (
-              <li key={item.productId} className="flex items-center justify-between py-3 text-sm">
-                <div>
+              <li key={item.productId} className="flex items-center justify-between gap-4 py-3 text-sm">
+                <div className="min-w-0">
                   <p className="font-medium">{item.name}</p>
-                  <p className="text-muted-foreground">Qty {item.quantity}</p>
+                  <p className="text-muted-foreground tabular-nums">
+                    {item.quantity} × ${item.price.toFixed(2)}
+                  </p>
                 </div>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="font-medium tabular-nums">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </span>
               </li>
             ))}
           </ul>
@@ -70,11 +86,13 @@ export default function CheckoutPage() {
 
           <div className="flex items-center justify-between text-lg font-semibold">
             <span>Total</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span className="tabular-nums">${subtotal.toFixed(2)}</span>
           </div>
 
           {createOrder.isError && (
-            <p className="text-sm text-destructive">{getApiErrorMessage(createOrder.error)}</p>
+            <p role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {getApiErrorMessage(createOrder.error)}
+            </p>
           )}
 
           <Button
@@ -83,8 +101,20 @@ export default function CheckoutPage() {
             disabled={createOrder.isPending}
             onClick={handlePlaceOrder}
           >
-            {createOrder.isPending ? "Placing order..." : "Place order"}
+            {createOrder.isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin motion-reduce:animate-none" /> Placing order…
+              </>
+            ) : (
+              "Place order"
+            )}
           </Button>
+
+          <Button
+            variant="ghost"
+            nativeButton={false}
+            render={<Link href="/products">Continue shopping</Link>}
+          />
 
           <p className="text-center text-xs text-muted-foreground">
             Shipping address and payment are not collected yet — this places a demo

@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// The most of one product a single order may carry; the cart and the product page both honour it.
+export const MAX_PER_ORDER = 10;
+
 export type CartItem = {
   productId: string;
   name: string;
