@@ -263,7 +263,7 @@ End-to-end tests live in `e2e/` and run with `npm run test:e2e` (config: `playwr
 Chromium only). They run against the **real backend** — start the Docker stack in the
 `TaskManager` repo first; the tests do not start it. The config reuses a dev server already on
 port 3100, or starts one there; the port is fixed because the gateway's CORS policy allows
-`http://localhost:3100` only.
+`http://localhost:3100` only. `npm run dev` therefore defaults to 3100 (`next dev --port 3100` in `package.json`), not Next's usual 3000; on any other port the page loads but the browser blocks its API calls.
 
 | Test | Covers |
 |---|---|

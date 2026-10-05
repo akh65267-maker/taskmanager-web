@@ -14,7 +14,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3100](http://localhost:3100) with your browser to see the result. The port is 3100, not the Next.js default of 3000, because the API gateway only allows that origin (CORS); on any other port the page loads but its API calls are blocked.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
